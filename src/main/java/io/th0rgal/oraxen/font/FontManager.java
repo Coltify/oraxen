@@ -25,9 +25,11 @@ public class FontManager {
     private final Map<Character, String> reverse;
     private final FontEvents fontEvents;
     private final Set<Font> fonts;
+    private static FontManager instance = null;
 
     public FontManager(final ConfigsManager configsManager) {
         final Configuration fontConfiguration = configsManager.getFont();
+        instance = this;
         autoGenerate = fontConfiguration.getBoolean("settings.automatically_generate");
         permsChatcolor = fontConfiguration.getString("settings.perms_chatcolor");
         glyphMap = new HashMap<>();
@@ -96,6 +98,10 @@ public class FontManager {
 
     public Map<Character, String> getReverseMap() {
         return reverse;
+    }
+
+    public static FontManager getInstance() {
+        return instance;
     }
 
 
