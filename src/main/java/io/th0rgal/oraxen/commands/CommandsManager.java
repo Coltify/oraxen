@@ -35,6 +35,7 @@ public class CommandsManager {
                 .withSubcommand((new ReloadCommand()).getReloadCommand())
                 .withSubcommand((new DebugCommand()).getDebugCommand())
                 .withSubcommand((new GlyphCommand()).getGlyphCommand())
+                .withSubcommand((new HudCommand()).getHudCommand())
                 .executes((sender, args) -> {
                     Message.COMMAND_HELP.send(sender);
                 })

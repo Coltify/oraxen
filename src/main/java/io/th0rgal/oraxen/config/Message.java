@@ -4,6 +4,7 @@ import io.th0rgal.oraxen.OraxenPlugin;
 import io.th0rgal.oraxen.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.Template;
+import net.kyori.adventure.text.minimessage.template.TemplateResolver;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -61,6 +62,10 @@ public enum Message {
     DYE_WRONG_COLOR("command.dye.wrong_color"),
     DYE_FAILED("command.dye.failed"),
 
+    HUD_NO_HUD("command.hud.no_hud"),
+    HUD_TOGGLE_ON("command.hud.toggle_on"),
+    HUD_TOGGLE_OFF("command.hud.toggle_off"),
+
     // mechanics
     MECHANICS_NOT_ENOUGH_EXP("mechanics.not_enough_exp");
 
@@ -82,10 +87,10 @@ public enum Message {
 
     public void send(final CommandSender sender, final Template... placeholders) {
         OraxenPlugin.get().getAudience().sender(sender).sendMessage(
-                Utils.MINI_MESSAGE.parse(OraxenPlugin.get().getConfigsManager().getLanguage().getString(path),
-                        ArrayUtils.addAll(new Template[]{
+                Utils.MINI_MESSAGE.deserialize(OraxenPlugin.get().getConfigsManager().getLanguage().getString(path),
+                        TemplateResolver.templates(ArrayUtils.addAll(new Template[]{
                                         Template.template("prefix", Message.PREFIX.toComponent())},
-                                placeholders))
+                                placeholders)))
         );
     }
 
