@@ -2,6 +2,7 @@ package io.th0rgal.oraxen.mechanics.provided.gameplay.stringblock;
 
 import com.google.gson.JsonObject;
 import io.th0rgal.oraxen.OraxenPlugin;
+import io.th0rgal.oraxen.items.OraxenItems;
 import io.th0rgal.oraxen.mechanics.Mechanic;
 import io.th0rgal.oraxen.mechanics.MechanicFactory;
 import io.th0rgal.oraxen.mechanics.MechanicsManager;
@@ -34,6 +35,7 @@ public class StringBlockMechanicFactory extends MechanicFactory {
         super(section);
         instance = this;
         variants = new JsonObject();
+        variants.add("east=false,west=false,south=false,north=false,attached=false,disarmed=false,powered=false", getModelJson("block/barrier"));
         toolTypes = section.getStringList("tool_types");
         saplingGrowthCheckDelay = section.getInt("sapling_growth_check_delay");
         sapling = false;
@@ -87,9 +89,9 @@ public class StringBlockMechanicFactory extends MechanicFactory {
     }
 
     private String getBlockstateContent() {
-        JsonObject noteblock = new JsonObject();
-        noteblock.add("variants", variants);
-        return noteblock.toString();
+        JsonObject tripwire = new JsonObject();
+        tripwire.add("variants", variants);
+        return tripwire.toString();
     }
 
     @Override
@@ -151,6 +153,11 @@ public class StringBlockMechanicFactory extends MechanicFactory {
     public void registerSaplingMechanic() {
         if (sapling) return;
         if (saplingTask != null) saplingTask.cancel();
+
+        // Dont register if there is no sapling in configs
+        if (OraxenItems.getItems().stream().filter(item ->
+                ((StringBlockMechanic) StringBlockMechanicFactory.getInstance()
+                        .getMechanic(OraxenItems.getIdByItem(item.build()))).isSapling()).toList().isEmpty()) return;
 
         saplingTask = new SaplingTask(this, saplingGrowthCheckDelay);
         saplingTask.runTaskTimer(OraxenPlugin.get(), 0, saplingGrowthCheckDelay);

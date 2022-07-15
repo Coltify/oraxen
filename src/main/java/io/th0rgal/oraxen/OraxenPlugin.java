@@ -83,6 +83,7 @@ public class OraxenPlugin extends JavaPlugin {
         invManager = new InvManager();
         new ArmorListener(Settings.ARMOR_EQUIP_EVENT_BYPASS.toStringList()).registerEvents(this);
         new BreakerSystem().registerListener();
+        new CommandsManager().loadCommands();
         postLoading(configsManager);
         Message.PLUGIN_LOADED.log(Template.template("os", OS.getOs().getPlatformName()));
         CompatibilitiesManager.enableNativeCompatibilities();
