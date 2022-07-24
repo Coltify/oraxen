@@ -34,12 +34,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.List;
 import java.util.Objects;
 
 import static io.th0rgal.oraxen.mechanics.provided.gameplay.noteblock.NoteBlockMechanicListener.getNoteBlockMechanic;
 import static io.th0rgal.oraxen.mechanics.provided.gameplay.stringblock.sapling.SaplingMechanic.SAPLING_KEY;
+import static io.th0rgal.oraxen.utils.BlockHelpers.isLoaded;
 
 public class StringBlockMechanicListener implements Listener {
 
@@ -95,7 +97,7 @@ public class StringBlockMechanicListener implements Listener {
 
             if (stringBlockMechanic == null) return;
             if (stringBlockMechanic.hasBreakSound())
-                block.getWorld().playSound(block.getLocation(), stringBlockMechanic.getBreakSound(), SoundCategory.BLOCKS, 1.0f, 0.8f);
+                BlockHelpers.playCustomBlockSound(block, stringBlockMechanic.getBreakSound());
             if (stringBlockMechanic.getLight() != -1)
                 WrappedLightAPI.removeBlockLight(block.getLocation());
             stringBlockMechanic.getDrop().spawns(block.getLocation(), new ItemStack(Material.AIR));
@@ -216,7 +218,7 @@ public class StringBlockMechanicListener implements Listener {
         if (placedBlock == null)
             return;
         if (mechanic.hasPlaceSound())
-            placedBlock.getWorld().playSound(placedBlock.getLocation(), mechanic.getPlaceSound(), SoundCategory.BLOCKS, 1.0f, 0.8f);
+            BlockHelpers.playCustomBlockSound(placedBlock, mechanic.getPlaceSound());
         if (mechanic.getLight() != -1)
             WrappedLightAPI.createBlockLight(placedBlock.getLocation(), mechanic.getLight());
         if (mechanic.isSapling()) {
@@ -242,28 +244,20 @@ public class StringBlockMechanicListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onStep(final GenericGameEvent event) {
+    public void onStepFall(final GenericGameEvent event) {
         Entity entity = event.getEntity();
         if (entity == null) return;
+        if (!isLoaded(event.getLocation())) return;
+        GameEvent gameEvent = event.getEvent();
         Block block = entity.getLocation().getBlock();
         StringBlockMechanic mechanic = getStringMechanic(block);
-        SoundGroup soundGroup = block.getBlockData().getSoundGroup();
+        String sound;
 
-        if (event.getEvent() != GameEvent.STEP) return;
-        if (mechanic != null && mechanic.hasStepSound())
-            block.getWorld().playSound(block.getLocation(), mechanic.getStepSound(), SoundCategory.BLOCKS, soundGroup.getVolume(), soundGroup.getPitch());
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onFall(final GenericGameEvent event) {
-        Entity entity = event.getEntity();
-        if (entity == null) return;
-        Block block = entity.getLocation().getBlock();
-        StringBlockMechanic mechanic = getStringMechanic(block);
-
-        if (event.getEvent() != GameEvent.HIT_GROUND) return;
-        if (mechanic != null && mechanic.hasFallSound())
-            block.getWorld().playSound(block.getLocation(), mechanic.getFallSound(), SoundCategory.BLOCKS, 1.0f, 1.0f);
+        if (mechanic == null) return;
+        if (gameEvent == GameEvent.STEP && mechanic.hasStepSound()) sound = mechanic.getStepSound();
+        else if (gameEvent == GameEvent.HIT_GROUND && mechanic.hasStepSound()) sound = mechanic.getFallSound();
+        else return;
+        BlockHelpers.playCustomBlockSound(block, sound, SoundCategory.PLAYERS);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -272,7 +266,9 @@ public class StringBlockMechanicListener implements Listener {
         final Player player = (Player) event.getInventory().getHolder();
         if (player == null) return;
         if (event.getCursor().getType() == Material.STRING) {
-            final Block block = Objects.requireNonNull(player.rayTraceBlocks(6.0)).getHitBlock();
+            final RayTraceResult rayTraceResult = player.rayTraceBlocks(6.0);
+            if (rayTraceResult == null) return;
+            final Block block = rayTraceResult.getHitBlock();
             if (block == null) return;
             StringBlockMechanic stringBlockMechanic = getStringMechanic(block);
             if (stringBlockMechanic == null) return;
@@ -375,7 +371,7 @@ public class StringBlockMechanicListener implements Listener {
     private void breakStringBlock(Block block, StringBlockMechanic mechanic, ItemStack item) {
         if (mechanic == null) return;
         if (mechanic.hasBreakSound())
-            block.getWorld().playSound(block.getLocation(), mechanic.getBreakSound(), 1.0f, 0.8f);
+            BlockHelpers.playCustomBlockSound(block, mechanic.getBreakSound());
         if (mechanic.getLight() != -1)
             WrappedLightAPI.removeBlockLight(block.getLocation());
         mechanic.getDrop().spawns(block.getLocation(), item);

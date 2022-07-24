@@ -103,6 +103,8 @@ public class FontManager {
     }
 
     public String getShift(int length) {
+        // Ensure shifts.yml exists as it is required
+        OraxenPlugin.get().saveResource("glyphs/shifts.yml", true);
         StringBuilder output = new StringBuilder();
         while (length > 0) {
             int biggestPower = Integer.highestOneBit(length);
