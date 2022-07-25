@@ -1,6 +1,5 @@
 package io.th0rgal.oraxen;
 
-import com.jeff_media.customblockdata.CustomBlockData;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIConfig;
 import io.th0rgal.oraxen.commands.CommandsManager;
